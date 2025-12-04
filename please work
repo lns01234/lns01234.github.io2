@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Balance of Powers – Parchment Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Crimson+Text:wght@600&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Crimson Text', serif;
+        background: linear-gradient(135deg, #d4c5b0 0%, #c9b8a0 50%, #d9ca15 100%);
+        background-attachment: fixed;
+        margin: 0;
+        padding: 40px;
+        text-align: center;
+        color: #2c1810;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    #roles, #game, .balance, h1, p, #message {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* King George III Comic */
+    #king-george {
+        position: fixed;
+        right: 30px;
+        bottom: 60px;
+        width: 180px;
+        z-index: 50;
+    }
+
+    #king-george-frame {
+        background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
+        border: 6px solid #3d2817;
+        border-radius: 4px;
+        padding: 8px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        position: relative;
+    }
+
+    #king-george-frame::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px inset rgba(0, 0, 0, 0.3);
+        border-radius: 2px;
+        pointer-events: none;
+    }
+
+    #king-face {
+        font-size: 120px;
+        line-height: 1;
+        transition: all 0.3s ease;
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+    }
+
+    #king-speech {
+        background: white;
+        border: 2px solid #3d2817;
+        border-radius: 4px;
+        padding: 8px;
+        margin-top: 8px;
+        font-family: 'IM Fell English SC', serif;
+        font-size: 11px;
+        color: #2c1810;
+        line-height: 1.3;
+        position: relative;
+        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    #king-speech::before {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 15px;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 0px solid transparent;
+        border-top: 8px solid white;
+    }
+
+    h1 {
+        font-family: 'IM Fell English SC', serif;
+        font-size: 56px;
+        margin-bottom: 5px;
+        text-shadow: 3px 3px #8b7355, -1px -1px rgba(255,255,255,0.3);
+        letter-spacing: 3px;
+        font-weight: normal;
+        color: #1a0f05;
+    }
+
+    p {
+        font-size: 18px;
+        margin-bottom: 30px;
+        font-style: italic;
+        color: #3d2817;
+        letter-spacing: 1px;
+    }
+
+    /* Wooden-style columns for branches */
+    .branch {
+        width: 28%;
+        min-height: 300px;
+        background: linear-gradient(135deg, rgba(160, 130, 95, 0.25) 0%, rgba(139, 112, 78, 0.2) 100%);
+        border: 3px solid #6b5344;
+        border-radius: 0px;
+        padding: 16px;
+        box-shadow: 0 0 15px rgba(50, 30, 10, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(2px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .branch::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px);
+        pointer-events: none;
+        transition: background 0.3s ease;
+    }
+
+    .branch.dragover {
+        background: linear-gradient(135deg, rgba(160, 130, 95, 0.45) 0%, rgba(139, 112, 78, 0.35) 100%);
+        box-shadow: 0 0 25px rgba(212, 165, 116, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.15);
+        transform: scale(1.02);
+        border-color: #8b7355;
+    }
+
+    #game {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .branch h2 {
+        font-family: 'IM Fell English SC', serif;
+        font-size: 32px;
+        margin-top: 0;
+        text-decoration: underline;
+        color: #1a0f05;
+        letter-spacing: 2px;
+        text-shadow: 1px 1px rgba(255,255,255,0.4);
+        font-weight: normal;
+    }
+
+    /* Roles styled like parchment slips */
+    .role {
+        background: linear-gradient(135deg, #f5ead5 0%, #e8dcc8 100%);
+        padding: 14px 18px;
+        margin: 10px;
+        border-radius: 4px;
+        border: 2px solid #8b7355;
+        cursor: grab;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(50, 30, 10, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 0 0 1px rgba(139, 115, 85, 0.3);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+        color: #2c1810;
+    }
+
+    .role::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s;
+        pointer-events: none;
+    }
+
+    .role:hover::before {
+        left: 100%;
+    }
+
+    .role:hover {
+        transform: scale(1.12) rotateZ(2deg) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(50, 30, 10, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 8px rgba(212, 165, 116, 0.5);
+        border-color: #a8956b;
+        background: linear-gradient(135deg, #fef4e6 0%, #f0e3c3 100%);
+    }
+
+    .role:active {
+        cursor: grabbing;
+        transform: scale(1.08) rotateZ(1deg);
+    }
+
+    .role.dragging {
+        opacity: 0.6;
+        transform: scale(0.95) rotateZ(-3deg);
+        box-shadow: 0 10px 30px rgba(50, 30, 10, 0.7);
+    }
+
+    /* King's Throne Section */
+    #king-section {
+        background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+        border: 4px double #2c1810;
+        border-radius: 0px;
+        padding: 25px;
+        margin-bottom: 35px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #king-section::before {
+        content: '👑';
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        font-size: 32px;
+        opacity: 0.3;
+    }
+
+    #king-section::after {
+        content: '👑';
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 32px;
+        opacity: 0.3;
+    }
+
+    #king-section h3 {
+        font-family: 'IM Fell English SC', serif;
+        color: #ffd700;
+        font-size: 26px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+    }
+
+    #roles {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Balance Beam */
+    .balance h3 {
+        font-family: 'IM Fell English SC', serif;
+        font-size: 32px;
+        margin-top: 40px;
+        letter-spacing: 2px;
+        color: #1a0f05;
+        text-shadow: 1px 1px rgba(255,255,255,0.4);
+        font-weight: normal;
+    }
+
+    #scale {
+        width: 240px;
+        height: 16px;
+        background: linear-gradient(to right, #3d2817, #5e4428, #3d2817);
+        margin: 20px auto;
+        border-radius: 8px;
+        transition: 0.8s ease;
+        transform: rotate(10deg);
+        box-shadow: 0 0 15px rgba(50, 30, 10, 0.8), 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.2);
+        border: 2px solid #2c1810;
+    }
+
+    #message {
+        margin-top: 25px;
+        font-size: 28px;
+        color: #8b0000;
+        font-weight: bold;
+        text-shadow: 2px 2px #d9ca15, 1px 1px rgba(0,0,0,0.2);
+        letter-spacing: 1px;
+        font-style: italic;
+    }
+
+    /* ✨ Subtle golden glitter floating animation */
+    .glitter {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: radial-gradient(circle, gold, transparent);
+        border-radius: 50%;
+        opacity: 0.8;
+        pointer-events: none;
+        animation: float 4s infinite ease-in-out;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px) scale(1); opacity: 0.9; }
+        50% { transform: translateY(-25px) scale(1.4); opacity: 1; }
+        100% { transform: translateY(0px) scale(1); opacity: 0.8; }
+    }
+</style>
+</head>
+
+<body>
+
+<div id="king-george">
+    <div id="king-george-frame">
+        <div id="king-face">👑😊</div>
+        <div id="king-speech">Lovely day for absolute monarchy, what?</div>
+    </div>
+</div>
+
+<h1>Balance the Powers</h1>
+<p>Match each constitutional role to its rightful branch of government.</p>
+
+<!-- Glitter generator -->
+<script>
+    for (let i = 0; i < 25; i++) {
+        let g = document.createElement("div");
+        g.className = "glitter";
+        g.style.left = Math.random() * window.innerWidth + "px";
+        g.style.top = Math.random() * window.innerHeight + "px";
+        g.style.animationDelay = (Math.random() * 5) + "s";
+        document.body.appendChild(g);
+    }
+</script>
+
+<div id="king-section">
+    <h3>Powers of the King</h3>
+    <div id="roles">
+        <div class="role" draggable="true" data-branch="legislative">Declares War</div>
+        <div class="role" draggable="true" data-branch="legislative">Creates Laws</div>
+        <div class="role" draggable="true" data-branch="executive">Enforces Laws</div>
+        <div class="role" draggable="true" data-branch="executive">Commander-in-Chief</div>
+        <div class="role" draggable="true" data-branch="judicial">Interprets Laws</div>
+        <div class="role" draggable="true" data-branch="judicial">Can Declare Laws Unconstitutional</div>
+    </div>
+</div>
+
+<div id="game">
+    <div class="branch" data-branch="legislative">
+        <h2>Legislative</h2>
+    </div>
+
+    <div class="branch" data-branch="executive">
+        <h2>Executive</h2>
+    </div>
+
+    <div class="branch" data-branch="judicial">
+        <h2>Judicial</h2>
+    </div>
+</div>
+
+<div class="balance">
+    <h3>Balance of Powers</h3>
+    <div id="scale"></div>
+</div>
+
+<div id="message"></div>
+
+<script>
+    const roles = document.querySelectorAll(".role");
+    const branches = document.querySelectorAll(".branch");
+
+    roles.forEach(role => {
+        role.addEventListener("dragstart", e => {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", role.outerHTML);
+            role.classList.add("dragging");
+        });
+
+        role.addEventListener("dragend", () => {
+            role.classList.remove("dragging");
+            branches.forEach(b => b.classList.remove("dragover"));
+        });
+    });
+
+    branches.forEach(branch => {
+        branch.addEventListener("dragover", e => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            branch.classList.add("dragover");
+        });
+
+        branch.addEventListener("dragleave", e => {
+            if (e.target === branch) {
+                branch.classList.remove("dragover");
+            }
+        });
+
+        branch.addEventListener("drop", e => {
+            e.preventDefault();
+            branch.classList.remove("dragover");
+            const dragged = document.querySelector(".dragging");
+            if (dragged) {
+                branch.appendChild(dragged);
+                checkWin();
+            }
+        });
+    });
+
+    function checkWin() {
+        let allCorrect = true;
+        let branchesHaveRoles = true;
+        let correctCount = 0;
+        let totalRoles = 6;
+
+        document.querySelectorAll(".branch").forEach(branch => {
+            const correctBranch = branch.dataset.branch;
+            const roles = branch.querySelectorAll(".role");
+            
+            if (roles.length === 0) {
+                branchesHaveRoles = false;
+            }
+            
+            roles.forEach(role => {
+                if (role.dataset.branch === correctBranch) {
+                    correctCount++;
+                } else {
+                    allCorrect = false;
+                }
+            });
+        });
+
+        // Update King George's reaction based on progress
+        updateKingReaction(correctCount, totalRoles);
+
+        if (allCorrect && branchesHaveRoles) {
+            // Check that all 6 roles are placed
+            const placedRoles = document.querySelectorAll(".branch .role").length;
+            
+            if (totalRoles === placedRoles) {
+                document.getElementById("scale").style.transform = "rotate(0deg)";
+                document.getElementById("message").textContent = "✨ Victory! The Balance is Restored. ✨";
+                createConfetti();
+                // Final King George reaction
+                const kingFace = document.getElementById("king-face");
+                const kingSpeech = document.getElementById("king-speech");
+                kingFace.textContent = "👑😤";
+                kingSpeech.textContent = "You DARE dismantle my throne?!";
+            }
+        }
+    }
+
+    function updateKingReaction(correctCount, totalRoles) {
+        const kingFace = document.getElementById("king-face");
+        const kingSpeech = document.getElementById("king-speech");
+        const progress = correctCount / totalRoles;
+
+        if (progress === 0) {
+            kingFace.textContent = "👑😊";
+            kingSpeech.textContent = "Lovely day for absolute monarchy, what?";
+        } else if (progress < 0.33) {
+            kingFace.textContent = "👑🤨";
+            kingSpeech.textContent = "What are you doing with my powers?";
+        } else if (progress < 0.67) {
+            kingFace.textContent = "👑😠";
+            kingSpeech.textContent = "How DARE you!";
+        } else if (progress < 1) {
+            kingFace.textContent = "👑🤬";
+            kingSpeech.textContent = "UNACCEPTABLE!";
+        }
+    }
+
+    // Confetti effect on win
+    function createConfetti() {
+        for (let i = 0; i < 30; i++) {
+            let confetti = document.createElement("div");
+            confetti.style.position = "fixed";
+            confetti.style.width = "10px";
+            confetti.style.height = "10px";
+            confetti.style.left = Math.random() * window.innerWidth + "px";
+            confetti.style.top = "-10px";
+            confetti.style.background = ["#FFD700", "#FFA500", "#FF6347", "#4169E1"][Math.floor(Math.random() * 4)];
+            confetti.style.borderRadius = "50%";
+            confetti.style.pointerEvents = "none";
+            confetti.style.zIndex = "9999";
+            document.body.appendChild(confetti);
+
+            let xVel = (Math.random() - 0.5) * 8;
+            let yVel = Math.random() * 5 + 3;
+            let rotation = 0;
+
+            let animationFrame = setInterval(() => {
+                let rect = confetti.getBoundingClientRect();
+                if (rect.top > window.innerHeight) {
+                    clearInterval(animationFrame);
+                    confetti.remove();
+                    return;
+                }
+                confetti.style.left = (parseFloat(confetti.style.left) + xVel) + "px";
+                confetti.style.top = (parseFloat(confetti.style.top) + yVel) + "px";
+                rotation += 10;
+                confetti.style.transform = `rotate(${rotation}deg)`;
+                yVel += 0.2;
+            }, 30);
+        }
+    }
+</script>
+
+</body>
+</html>
+ 
